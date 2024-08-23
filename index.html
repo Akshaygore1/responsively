@@ -95,7 +95,7 @@
         if (url) {
           const iframes = document.getElementsByTagName("iframe");
           for (let iframe of iframes) {
-            iframe.src = url;
+            iframe.src = `/proxy?url=${encodeURIComponent(url)}`;
           }
         } else {
           alert("Please enter a URL");
