@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Design Tester</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .controls {
+        margin-bottom: 20px;
+      }
+
+      #urlInput,
+      #widthInput,
+      #heightInput {
+        width: 200px;
+        padding: 5px;
+        margin-right: 10px;
+      }
+
+      button {
+        padding: 5px 10px;
+        margin-right: 10px;
+      }
+
+      .viewports {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .viewport {
+        border: 1px solid #ccc;
+        padding: 10px;
+        position: relative;
+      }
+
+      .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 5px;
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      iframe {
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <input type="text" id="urlInput" placeholder="Enter URL" />
+      <button onclick="loadURL()">Load</button>
+      <input type="number" id="widthInput" placeholder="Width" />
+      <input type="number" id="heightInput" placeholder="Height" />
+      <button onclick="addScreen()">Add Screen</button>
+    </div>
+    <div class="viewports" id="viewportsContainer">
+      <div class="viewport">
+        <h3>Mobile (320px)</h3>
+        <iframe src="" width="320" height="568"></iframe>
+        <button class="remove-btn" onclick="removeScreen(this)">×</button>
+      </div>
+      <div class="viewport">
+        <h3>Tablet (768px)</h3>
+        <iframe src="" width="768" height="1024"></iframe>
+        <button class="remove-btn" onclick="removeScreen(this)">×</button>
+      </div>
+      <div class="viewport">
+        <h3>Desktop (1280px)</h3>
+        <iframe src="" width="1280" height="800"></iframe>
+        <button class="remove-btn" onclick="removeScreen(this)">×</button>
+      </div>
+    </div>
+
+    <script>
+      function loadURL() {
+        const url = document.getElementById("urlInput").value;
+        if (url) {
+          const iframes = document.getElementsByTagName("iframe");
+          for (let iframe of iframes) {
+            iframe.src = url;
+          }
+        } else {
+          alert("Please enter a URL");
+        }
+      }
+
+      function addScreen() {
+        const width = document.getElementById("widthInput").value;
+        const height = document.getElementById("heightInput").value;
+        if (width && height) {
+          const viewportsContainer =
+            document.getElementById("viewportsContainer");
+          const newViewport = document.createElement("div");
+          newViewport.className = "viewport";
+          newViewport.innerHTML = `
+            <h3>Custom (${width}px)</h3>
+            <iframe src="" width="${width}" height="${height}"></iframe>
+            <button class="remove-btn" onclick="removeScreen(this)">×</button>
+          `;
+          viewportsContainer.appendChild(newViewport);
+
+          const newIframe = newViewport.querySelector("iframe");
+          const url = document.getElementById("urlInput").value;
+          if (url) {
+            newIframe.src = url;
+          }
+
+          setupScrollSync(newIframe);
+        } else {
+          alert("Please enter both width and height");
+        }
+      }
+
+      function removeScreen(button) {
+        const viewport = button.parentElement;
+        viewport.remove();
+      }
+
+      function setupScrollSync(iframe) {
+        iframe.onload = function () {
+          iframe.contentWindow.addEventListener("scroll", function () {
+            syncScroll(iframe);
+          });
+        };
+      }
+
+      function syncScroll(sourceIframe) {
+        const iframes = document.getElementsByTagName("iframe");
+        const scrollPercentage =
+          sourceIframe.contentWindow.scrollY /
+          (sourceIframe.contentDocument.documentElement.scrollHeight -
+            sourceIframe.contentWindow.innerHeight);
+
+        for (let iframe of iframes) {
+          if (iframe !== sourceIframe) {
+            const scrollAmount =
+              scrollPercentage *
+              (iframe.contentDocument.documentElement.scrollHeight -
+                iframe.contentWindow.innerHeight);
+            iframe.contentWindow.scrollTo(0, scrollAmount);
+          }
+        }
+      }
+
+      // Setup initial scroll sync
+      const initialIframes = document.getElementsByTagName("iframe");
+      for (let iframe of initialIframes) {
+        setupScrollSync(iframe);
+      }
+    </script>
+  </body>
+</html>
